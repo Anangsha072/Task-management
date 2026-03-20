@@ -12,7 +12,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:3000",
-      "https://task-management-pi-six.vercel.app/"// 👈 PUT YOUR FRONTEND URL
+      "https://task-management-jobh.vercel.app"// 👈 PUT YOUR FRONTEND URL
     ],
     credentials: true,
   })
