@@ -1,8 +1,8 @@
-import jwt from "jsonwebtoken";
+import jwt, { Secret } from "jsonwebtoken";
 import { prisma } from "./prisma";
 
-const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET!;
-const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET!;
+const ACCESS_SECRET: Secret = process.env.JWT_ACCESS_SECRET!;
+const REFRESH_SECRET: Secret = process.env.JWT_REFRESH_SECRET!;
 const ACCESS_EXPIRY = process.env.ACCESS_TOKEN_EXPIRY || "15m";
 const REFRESH_EXPIRY = process.env.REFRESH_TOKEN_EXPIRY || "7d";
 
@@ -30,7 +30,9 @@ export function verifyRefreshToken(token: string): TokenPayload {
 export async function createRefreshTokenRecord(userId: string): Promise<string> {
   const payload: TokenPayload = { userId, email: "" };
   const token = signRefreshToken(payload);
-  const decoded = jwt.decode(token) as { exp: number };
+  const decoded = jwt.decode(token) as { exp: number | undefined };
+  if (!decoded.exp) throw new Error("Invalid token expiry");
+
   await prisma.refreshToken.create({
     data: {
       token,
@@ -38,6 +40,7 @@ export async function createRefreshTokenRecord(userId: string): Promise<string> 
       expiresAt: new Date(decoded.exp * 1000),
     },
   });
+
   return token;
 }
 
