@@ -10,9 +10,7 @@ const PORT = process.env.PORT || 4000;
 
 app.use(
   cors({
-    origin: [
-      "https://task-management-jobh.vercel.app"// 👈 PUT YOUR FRONTEND URL
-    ],
+    origin: true, // ✅ allow ALL origins
     credentials: true,
   })
 );
