@@ -1,4 +1,4 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+const API_BASE = "https://task-management-12.onrender.com";
 
 export type User = { id: string; email: string };
 export type Task = {
