@@ -25,7 +25,7 @@ export const requireAuth = async (
 
     if (!token) return next(new AppError("Token missing", 401));
 
-    const secret = process.env.ACCESS_TOKEN_SECRET;
+    const secret = process.env.JWT_ACCESS_SECRET;
     if (!secret) throw new AppError("JWT secret not configured", 500);
 
     let payload: any;
