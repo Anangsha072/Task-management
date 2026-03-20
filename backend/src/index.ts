@@ -12,7 +12,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:3000",
-      "https://your-frontend-url.onrender.com" // 👈 PUT YOUR FRONTEND URL
+      "https://task-management-pi-six.vercel.app/"// 👈 PUT YOUR FRONTEND URL
     ],
     credentials: true,
   })
