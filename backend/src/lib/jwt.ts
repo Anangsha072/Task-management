@@ -1,4 +1,5 @@
-import jwt, { Secret } from "jsonwebtoken";
+// src/lib/jwt.ts
+import jwt, { Secret, SignOptions } from "jsonwebtoken";
 import { prisma } from "./prisma";
 
 const ACCESS_SECRET: Secret = process.env.JWT_ACCESS_SECRET!;
@@ -11,8 +12,10 @@ export interface TokenPayload {
   email: string;
 }
 
+const signOptions: SignOptions = { expiresIn: ACCESS_EXPIRY };
+
 export function signAccessToken(payload: TokenPayload): string {
-  return jwt.sign(payload, ACCESS_SECRET, { expiresIn: ACCESS_EXPIRY });
+  return jwt.sign(payload, ACCESS_SECRET, signOptions);
 }
 
 export function signRefreshToken(payload: TokenPayload): string {
@@ -30,28 +33,21 @@ export function verifyRefreshToken(token: string): TokenPayload {
 export async function createRefreshTokenRecord(userId: string): Promise<string> {
   const payload: TokenPayload = { userId, email: "" };
   const token = signRefreshToken(payload);
-  const decoded = jwt.decode(token) as { exp: number | undefined };
+  const decoded = jwt.decode(token) as { exp?: number };
   if (!decoded.exp) throw new Error("Invalid token expiry");
 
   await prisma.refreshToken.create({
-    data: {
-      token,
-      userId,
-      expiresAt: new Date(decoded.exp * 1000),
-    },
+    data: { token, userId, expiresAt: new Date(decoded.exp * 1000) },
   });
 
   return token;
 }
 
-export async function revokeRefreshToken(token: string): Promise<void> {
+export async function revokeRefreshToken(token: string) {
   await prisma.refreshToken.deleteMany({ where: { token } });
 }
 
-export async function isValidRefreshToken(token: string): Promise<boolean> {
-  const record = await prisma.refreshToken.findUnique({
-    where: { token },
-  });
-  if (!record || record.expiresAt < new Date()) return false;
-  return true;
+export async function isValidRefreshToken(token: string) {
+  const record = await prisma.refreshToken.findUnique({ where: { token } });
+  return !!record && record.expiresAt >= new Date();
 }
