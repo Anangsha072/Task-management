@@ -1,18 +1,14 @@
-// src/routes/tasks.ts
 import { Router, Request, Response, NextFunction } from "express";
 import { body, param, query, validationResult } from "express-validator";
 import { requireAuth } from "../middleware/auth";
 import { AppError } from "../middleware/errorHandler";
 import { prisma } from "../lib/prisma";
 
-interface AuthRequest extends Request {
-  user?: { id: string; email: string };
-}
-
 export const tasksRouter = Router();
-tasksRouter.use(requireAuth);
 
-const statusValues = ["pending", "in_progress", "completed"] as const;
+tasksRouter.use(requireAuth); // Protect all routes
+
+const statusValues = ["pending", "in_progress", "completed"];
 
 tasksRouter.get(
   "/",
@@ -22,12 +18,12 @@ tasksRouter.get(
     query("status").optional().isIn(statusValues),
     query("search").optional().isString().trim(),
   ],
-  async (req: AuthRequest, res: Response, next: NextFunction) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) return res.status(400).json({ error: errors.array()[0].msg });
 
-      const userId = req.user!.id;
+      const userId = (req as any).user.id;
       const page = Number(req.query.page) || 1;
       const limit = Number(req.query.limit) || 10;
       const status = req.query.status as string | undefined;
@@ -42,9 +38,14 @@ tasksRouter.get(
         prisma.task.count({ where }),
       ]);
 
-      res.json({ tasks, pagination: { page, limit, total, totalPages: Math.ceil(total / limit) } });
+      return res.json({
+        tasks,
+        pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+      });
     } catch (e) {
       next(e);
     }
   }
 );
+
+// Do the same type annotations for POST, PATCH, DELETE, and toggle routes
