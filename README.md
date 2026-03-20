@@ -45,3 +45,5 @@ Access token in `Authorization: Bearer <token>`; refresh token in cookie or body
 
 - **Backend** `.env`: `DATABASE_URL`, `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET`, `PORT` (default 4000). Optional: `ACCESS_TOKEN_EXPIRY`, `REFRESH_TOKEN_EXPIRY`, `FRONTEND_URL`.
 - **Frontend**: optional `NEXT_PUBLIC_API_URL` (default `http://localhost:4000`).
+## Deployment 
+To view the demo app live click on https://task-management-3ixx.vercel.app/ 
